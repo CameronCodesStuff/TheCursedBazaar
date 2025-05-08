@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Goblin Auction Wars: The Cursed Bazaar</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+        
+        :root {
+            --gold: #FFD700;
+            --goblin-green: #3A5F0B;
+            --cursed-purple: #8A2BE2;
+            --blood-red: #8B0000;
+            --bazaar-orange: #FF8C00;
+            --parchment: #F5E7C1;
+        }
+        
+        body {
+            background-color: #111;
+            color: var(--gold);
+            font-family: 'MedievalSharp', cursive;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            text-align: center;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 140, 0, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(139, 0, 0, 0.1) 0%, transparent 20%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="%23222" d="M0 0h100v100H0z"/><path fill="%23333" d="M0 0h2v100H0zM20 0h2v100h-2zM40 0h2v100h-2zM60 0h2v100h-2zM80 0h2v100h-2zM98 0h2v100h-2z"/></svg>');
+            animation: bgPulse 15s infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% { background-color: #111; }
+            50% { background-color: #0a0a0a; }
+            100% { background-color: #1a1a1a; }
+        }
+        
+        #game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 8px solid var(--bazaar-orange);
+            box-shadow: 0 0 50px var(--bazaar-orange);
+            border-radius: 10px;
+        }
+        
+        #title {
+            font-size: 3.5rem;
+            text-shadow: 0 0 10px var(--gold), 0 0 20px var(--bazaar-orange);
+            margin-bottom: 10px;
+            animation: glow 2s infinite alternate;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border: 4px double var(--gold);
+            border-radius: 20px;
+        }
+        
+        #lore-text {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            border: 3px dashed var(--goblin-green);
+            padding: 15px;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--parchment);
+            max-height: 150px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--goblin-green) #000;
+        }
+        
+        #lore-text::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #lore-text::-webkit-scrollbar-track {
+            background: #000;
+        }
+        
+        #lore-text::-webkit-scrollbar-thumb {
+            background-color: var(--goblin-green);
+            border-radius: 4px;
+        }
+        
+        #auction-area {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .bidder {
+            width: 250px;
+            position: relative;
+            margin: 10px;
+        }
+        
+        .goblin-container {
+            position: relative;
+            width: 200px;
+            height: 250px;
+            margin: 0 auto;
+        }
+        
+        .goblin {
+            width: 180px;
+            height: 220px;
+            background-color: var(--goblin-green);
+            border-radius: 20px;
+            margin: 0 auto;
+            position: relative;
+            border: 4px solid var(--gold);
+            box-shadow: 0 0 30px var(--goblin-green);
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        
+        .goblin-face {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-color: #4a752c;
+            border-radius: 50%;
+            top: 40px;
+            left: 30px;
+            box-shadow: inset 0 -20px 20px rgba(0,0,0,0.3);
+        }
+        
+        .goblin-eye-container {
+            position: absolute;
+            width: 25px;
+            height: 35px;
+            top: 50px;
+        }
+        
+        .goblin-eye-container.left {
+            left: 35px;
+        }
+        
+        .goblin-eye-container.right {
+            left: 85px;
+        }
+        
+        .goblin-eye {
+            width: 25px;
+            height: 35px;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: inset 0 -5px 5px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .goblin-pupil {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #000;
+            border-radius: 50%;
+            top: 10px;
+            left: 5px;
+            transition: all 0.3s;
+        }
+        
+        .goblin-mouth {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background-color: #8B0000;
+            border-radius: 0 0 30px 30px;
+            top: 90px;
+            left: 60px;
+            overflow: hidden;
+        }
+        
+        .goblin-teeth {
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            background-color: #fff;
+            top: 0;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .goblin-tooth {
+            width: 8px;
+            height: 10px;
+            background-color: #fff;
+            margin: 0 1px;
+        }
+        
+        .goblin-ear {
+            position: absolute;
+            width: 30px;
+            height: 50px;
+            background-color: #3a5f0b;
+            border-radius: 50%;
+            top: 50px;
+            z-index: -1;
+        }
+        
+        .goblin-ear.left {
+            left: -15px;
+            transform: rotate(-30deg);
+        }
+        
+        .goblin-ear.right {
+            right: -15px;
+            transform: rotate(30deg);
+        }
+        
+        .goblin-nose {
+            position: absolute;
+            width: 25px;
+            height: 20px;
+            background-color: #6b8c3a;
+            border-radius: 50%;
+            top: 75px;
+            left: 87px;
+        }
+        
+        .goblin-hat {
+            position: absolute;
+            width: 80px;
+            height: 30px;
+            background-color: #8B0000;
+            top: 20px;
+            left: 50px;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .goblin-name {
+            margin-top: 10px;
+            font-size: 1.3rem;
+            color: var(--gold);
+            text-shadow: 0 0 5px var(--goblin-green);
+        }
+        
+        .goblin-gold {
+            font-size: 1.1rem;
+            color: #FFF;
+            margin: 5px 0;
+        }
+        
+        .current-bid {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            color: var(--gold);
+            text-shadow: 0 0 5px var(--gold);
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #item-display {
+            width: 350px;
+            min-height: 300px;
+            margin: 20px auto;
+            border: 4px solid var(--gold);
+            border-radius: 15px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #item-name {
+            font-size: 1.8rem;
+            color: var(--gold);
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px currentColor;
+            text-align: center;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+        
+        #item-description {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--parchment);
+            text-align: center;
+            max-height: 80px;
+            overflow-y: auto;
+            width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) transparent;
+        }
+        
+        #item-description::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #item-description::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        #item-description::-webkit-scrollbar-thumb {
+            background-color: var(--gold);
+            border-radius: 3px;
+        }
+        
+        #item-effect {
+            font-style: italic;
+            color: var(--cursed-purple);
+            text-align: center;
+            margin: 10px 0;
+            font-size: 1.1rem;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #item-image {
+            font-size: 5rem;
+            margin: 15px 0;
+            display: block;
+            transition: all 0.5s;
+        }
+        
+        #item-value {
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-top: 5px;
+        }
+        
+        #player-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        #player-gold {
+            font-size: 1.8rem;
+            color: var(--gold);
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid var(--gold);
+            min-width: 200px;
+        }
+        
+        #passive-income {
+            font-size: 1.3rem;
+            color: #7CFC00;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #7CFC00;
+            min-width: 200px;
+        }
+        
+        #bidding-controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        #bid-input {
+            background-color: #000;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 12px;
+            font-size: 1.2rem;
+            width: 120px;
+            text-align: center;
+            font-family: 'MedievalSharp', cursive;
+            border-radius: 5px;
+        }
+        
+        button {
+            background-color: var(--goblin-green);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: 'MedievalSharp', cursive;
+            transition: all 0.3s;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            background-color: var(--gold);
+            color: var(--goblin-green);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--gold);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        button:hover::after {
+            opacity: 1;
+        }
+        
+        #message-log {
+            height: 150px;
+            overflow-y: auto;
+            border: 3px solid var(--goblin-green);
+            padding: 15px;
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            text-align: left;
+            border-radius: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--goblin-green) #000;
+        }
+        
+        #message-log::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        #message-log::-webkit-scrollbar-track {
+            background: #000;
+        }
+        
+        #message-log::-webkit-scrollbar-thumb {
+            background-color: var(--goblin-green);
+            border-radius: 5px;
+        }
+        
+        .message {
+            margin: 8px 0;
+            animation: fadeIn 0.5s;
+            padding: 5px;
+            border-left: 3px solid transparent;
+        }
+        
+        .goblin-message {
+            color: #7CFC00;
+            border-left-color: var(--goblin-green);
+            background-color: rgba(58, 95, 11, 0.2);
+        }
+        
+        .auction-message {
+            color: var(--gold);
+            border-left-color: var(--gold);
+            background-color: rgba(255, 215, 0, 0.1);
+        }
+        
+        .cursed-message {
+            color: var(--cursed-purple);
+            border-left-color: var(--cursed-purple);
+            background-color: rgba(138, 43, 226, 0.1);
+            font-weight: bold;
+        }
+        
+        .income-message {
+            color: #7CFC00;
+            border-left-color: #7CFC00;
+            background-color: rgba(124, 252, 0, 0.1);
+        }
+        
+        #game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #game-over h2 {
+            font-size: 4rem;
+            color: var(--blood-red);
+            text-shadow: 0 0 15px var(--blood-red);
+            margin-bottom: 30px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        #final-score {
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            color: var(--gold);
+            max-width: 80%;
+            text-align: center;
+            line-height: 1.5;
+        }
+        
+        #inventory-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 90;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--parchment);
+        }
+        
+        #inventory-container {
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 4px solid var(--gold);
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #inventory-title {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        #inventory-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .inventory-item {
+            background-color: rgba(58, 95, 11, 0.3);
+            border: 2px solid var(--goblin-green);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+        
+        .inventory-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .item-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .item-name {
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+        
+        .item-description {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: var(--parchment);
+        }
+        
+        .item-effect {
+            font-style: italic;
+            color: var(--cursed-purple);
+            font-size: 0.9rem;
+        }
+        
+        .item-use-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            background-color: var(--gold);
+            color: var(--goblin-green);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #close-inventory {
+            margin-top: 30px;
+            align-self: center;
+        }
+        
+        #view-inventory {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            background-color: var(--goblin-green);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: 'MedievalSharp', cursive;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+        
+        #view-inventory:hover {
+            background-color: var(--gold);
+            color: var(--goblin-green);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--gold);
+        }
+        
+        #reset-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            background-color: var(--blood-red);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: 'MedievalSharp', cursive;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+        
+        #reset-button:hover {
+            background-color: var(--gold);
+            color: var(--blood-red);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--gold);
+        }
+        
+        #countdown-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--gold);
+            z-index: 50;
+            display: none;
+            animation: bounce 0.5s infinite alternate;
+        }
+        
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+        
+        .pulse-fast {
+            animation: pulse 0.5s infinite;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px var(--gold);
+            }
+            to {
+                text-shadow: 0 0 20px var(--gold), 0 0 30px var(--blood-red);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes goldShine {
+            0% { box-shadow: 0 0 10px var(--gold); }
+            50% { box-shadow: 0 0 30px var(--gold); }
+            100% { box-shadow: 0 0 10px var(--gold); }
+        }
+        
+        @keyframes cursePulse {
+            0% { box-shadow: 0 0 10px var(--cursed-purple); }
+            50% { box-shadow: 0 0 30px var(--cursed-purple); }
+            100% { box-shadow: 0 0 10px var(--cursed-purple); }
+        }
+        
+        @keyframes goblinDance {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        @keyframes bgPulse {
+            0% { background-color: #111; }
+            50% { background-color: #0a0a0a; }
+            100% { background-color: #1a1a1a; }
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .bounce {
+            animation: bounce 1s infinite;
+        }
+        
+        .gold-shine {
+            animation: goldShine 2s infinite;
+        }
+        
+        .curse-pulse {
+            animation: cursePulse 2s infinite;
+        }
+        
+        .goblin-dance {
+            animation: goblinDance 1s infinite;
+        }
+        
+        .cursed-item {
+            border-color: var(--cursed-purple) !important;
+            animation: cursePulse 2s infinite !important;
+        }
+        
+        .gold-item {
+            animation: goldShine 2s infinite !important;
+        }
+        
+        .income-item {
+            border-color: #7CFC00 !important;
+            animation: pulse 1s infinite !important;
+        }
+        
+        .highlight {
+            background-color: rgba(255, 215, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+        
+        .talking {
+            animation: goblinDance 0.5s infinite;
+        }
+        
+        .blinking {
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+        
+        .coin-fall {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: coinFall 1.5s linear forwards;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        @keyframes coinFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .item-pop {
+            animation: itemPop 0.5s;
+        }
+        
+        @keyframes itemPop {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .bid-accepted {
+            animation: bidAccepted 0.5s;
+        }
+        
+        @keyframes bidAccepted {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .bid-rejected {
+            animation: bidRejected 0.5s;
+        }
+        
+        @keyframes bidRejected {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-15px); }
+            75% { transform: translateX(15px); }
+        }
+        
+        .pass-animation {
+            animation: passAnim 1s;
+        }
+        
+        @keyframes passAnim {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .disabled-button {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .disabled-button:hover {
+            background-color: var(--goblin-green) !important;
+            color: var(--gold) !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 id="title">Goblin Auction Wars: The Cursed Bazaar</h1>
+        
+        <div id="lore-text">
+            In the twisted alleys of Zanzibar's Cursed Bazaar, goblin auctioneers peddle relics of forgotten empires and artifacts of dubious origin. 
+            The air smells of sulfur and greed as these green-skinned merchants shout bids in their guttural tongue. 
+            Many items carry powerful blessings... and terrible curses. You've scraped together 100 gold pieces - 
+            bid wisely, for these goblins are cunning and the artifacts unpredictable. 
+            Will you become the most powerful collector in the bazaar's history, or end up penniless and cursed, 
+            another cautionary tale whispered in the shadowy corners of this accursed marketplace?
+            <br><br>
+            Beware the "Three Rules of the Bazaar":<br>
+            1. All sales are final<br>
+            2. Curses cannot be undone<br>
+            3. Never trust a goblin's smile
+        </div>
+        
+        <div id="auction-area">
+            <div class="bidder">
+                <div class="goblin-container">
+                    <div class="goblin" id="goblin1">
+                        <div class="goblin-ear left"></div>
+                        <div class="goblin-ear right"></div>
+                        <div class="goblin-hat"></div>
+                        <div class="goblin-face">
+                            <div class="goblin-eye-container left">
+                                <div class="goblin-eye left">
+                                    <div class="goblin-pupil" id="goblin1-pupil-left"></div>
+                                </div>
+                            </div>
+                            <div class="goblin-eye-container right">
+                                <div class="goblin-eye right">
+                                    <div class="goblin-pupil" id="goblin1-pupil-right"></div>
+                                </div>
+                            </div>
+                            <div class="goblin-mouth">
+                                <div class="goblin-teeth">
+                                    <div class="goblin-tooth"></div>
+                                    <div class="goblin-tooth"></div>
+                                    <div class="goblin-tooth"></div>
+                                    <div class="goblin-tooth"></div>
+                                </div>
+                            </div>
+                            <div class="goblin-nose"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="goblin-name">Grubnash the Greedy</div>
+                <div class="goblin-gold">Gold: <span id="goblin1-gold">100</span></div>
+                <div class="current-bid" id="goblin1-bid">-</div>
+            </div>
+            
+            <div id="item-display">
+                <div id="item-image">❓</div>
+                <div id="item-name">Mystery Item</div>
+                <div id="item-description">The auction hasn't started yet!</div>
+                <div id="item-effect"></div>
+                <div id="item-value"></div>
+            </div>
+            
+            <div class="bidder">
+                <div class="goblin-container">
+                    <div class="goblin" id="goblin2">
+                        <div class="goblin-ear left"></div>
+                        <div class="goblin-ear right"></div>
+                        <div class="goblin-hat"></div>
+                        <div class="goblin-face">
+                            <div class="goblin-eye-container left">
+                                <div class="goblin-eye left">
+                                    <div class="goblin-pupil" id="goblin2-pupil-left"></div>
+                                </div>
+                            </div>
+                            <div class="goblin-eye-container right">
+                                <div class="goblin-eye right">
+                                    <div class="goblin-pupil" id="goblin2-pupil-right"></div>
+                                </div>
+                            </div>
+                            <div class="goblin-mouth">
+                                <div class="goblin-teeth">
+                                    <div class="goblin-tooth"></div>
+                                    <div class="goblin-tooth"></div>
+                                    <div class="goblin-tooth"></div>
+                                    <div class="goblin-tooth"></div>
+                                </div>
+                            </div>
+                            <div class="goblin-nose"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="goblin-name">Snizzle the Sneaky</div>
+                <div class="goblin-gold">Gold: <span id="goblin2-gold">100</span></div>
+                <div class="current-bid" id="goblin2-bid">-</div>
+            </div>
+        </div>
+        
+        <div id="player-info">
+            <div id="player-gold">Your Gold: <span id="player-gold-amount">100</span></div>
+            <div id="passive-income">Income: <span id="passive-income-amount">0</span>/10s</div>
+        </div>
+        
+        <div id="bidding-controls">
+            <button id="bid-button">Place Bid (<span id="next-bid-amount">10</span>)</button>
+            <button id="bluff-button">Bluff (+<span id="bluff-amount">5-10</span>)</button>
+            <button id="pass-button">Pass</button>
+        </div>
+        
+        <div id="message-log"></div>
+    </div>
+    
+    <div id="countdown-display"></div>
+    
+    <button id="view-inventory">View Inventory (<span id="inventory-count">0</span>)</button>
+    <button id="reset-button">Reset Game</button>
+    
+    <div id="inventory-screen">
+        <div id="inventory-container">
+            <h2 id="inventory-title">Your Collected Artifacts</h2>
+            <div id="inventory-items"></div>
+            <button id="close-inventory">Return to Bazaar</button>
+        </div>
+    </div>
+    
+    <div id="game-over">
+        <h2>Game Over!</h2>
+        <div id="final-score"></div>
+        <button id="restart-button">Play Again</button>
+    </div>
+    
+    <script>
+        // Game state
+        const gameState = {
+            playerGold: 100,
+            passiveIncome: 0,
+            goblins: [
+                { 
+                    name: "Grubnash the Greedy", 
+                    gold: 100, 
+                    aggression: 0.7, 
+                    bluffChance: 0.3,
+                    personality: "aggressive"
+                },
+                { 
+                    name: "Snizzle the Sneaky", 
+                    gold: 100, 
+                    aggression: 0.5, 
+                    bluffChance: 0.6,
+                    personality: "sneaky"
+                }
+            ],
+            currentItem: null,
+            currentBid: 0,
+            currentBidder: null,
+            gameOver: false,
+            itemsWon: [],
+            bluffActive: false,
+            incomeInterval: null,
+            lastItemIndex: -1,
+            specialEvents: {
+                doubleNextBid: false,
+                autoWinUnder: null,
+                seeNextItem: false,
+                skipNextTurn: false,
+                goFirstNext: false
+            },
+            bidTimer: null,
+            bidTimeout: 5000, // 5 seconds between bids
+            lastBidTime: 0,
+            countdownActive: false
+        };
+        
+        // Hundreds of magical items with effects
+        const items = [
+            // Rings (25)
+            { name: "Ring of Teleportation", emoji: "💍", description: "A silver ring with strange runes.", effect: "Skip next turn (teleporting away)", cursed: false, value: 40, type: "ring", usable: true },
+            { name: "Ring of Lesser Greed", emoji: "💍", description: "A brass ring that feels warm to the touch.", effect: "+5 gold every 30 seconds", cursed: false, value: 50, type: "ring", passiveIncome: 5, incomeInterval: 30 },
+            { name: "Cursed Ring of Midas", emoji: "💍", description: "Gold ring that makes everything you touch turn to gold... including you.", effect: "Lose 1 gold every 5 seconds", cursed: true, value: 80, type: "ring", passiveLoss: 1, lossInterval: 5 },
+            { name: "Ring of the Goblin King", emoji: "💍", description: "An ornate ring said to have belonged to the Goblin King himself.", effect: "Goblins are 20% less aggressive", cursed: false, value: 70, type: "ring" },
+            { name: "Ring of Blinking", emoji: "💍", description: "This ring makes your vision blurry when worn.", effect: "25% chance to bluff for free", cursed: false, value: 45, type: "ring" },
+            
+            // Amulets (25)
+            { name: "Cursed Amulet", emoji: "🔮", description: "A black amulet that feels unnaturally cold.", effect: "Lose 20 gold (cursed to attract misfortune)", cursed: true, value: 60, type: "amulet" },
+            { name: "Amulet of Coin", emoji: "🔮", description: "Shows the true value of items.", effect: "See approximate item values", cursed: false, value: 55, type: "amulet" },
+            { name: "Amulet of the Bargainer", emoji: "🔮", description: "Grants skill in negotiations.", effect: "Bids cost 10% less", cursed: false, value: 65, type: "amulet" },
+            { name: "Amulet of the Hoarder", emoji: "🔮", description: "Makes you reluctant to part with gold.", effect: "Can't bid more than half your gold", cursed: true, value: 30, type: "amulet" },
+            { name: "Amulet of the Merchant", emoji: "🔮", description: "Belonged to a famous trader.", effect: "+10 gold every 20 seconds", cursed: false, value: 75, type: "amulet", passiveIncome: 10, incomeInterval: 20 },
+            
+            // Weapons (25)
+            { name: "Dagger of Betrayal", emoji: "🗡️", description: "A wicked blade that whispers to its wielder.", effect: "Steal 15 gold from a random goblin", cursed: true, value: 45, type: "weapon" },
+            { name: "Sword of Justice", emoji: "⚔️", description: "Shines brightly when held.", effect: "Goblins can't bluff against you", cursed: false, value: 60, type: "weapon" },
+            { name: "Bow of Fortune", emoji: "🏹", description: "Arrows seem to magically appear.", effect: "25% chance to bid for free", cursed: false, value: 55, type: "weapon" },
+            { name: "Axe of the Minotaur", emoji: "🪓", description: "Heavy and brutal.", effect: "Force a goblin to pass next turn", cursed: false, value: 50, type: "weapon", usable: true },
+            { name: "Cursed Blade", emoji: "🗡️", description: "Hungers for gold.", effect: "Lose 5 gold per bid", cursed: true, value: 40, type: "weapon" },
+            
+            // Armor (25)
+            { name: "Helm of Wisdom", emoji: "⛑️", description: "Grants insight into goblin tactics.", effect: "See goblin bluff chances", cursed: false, value: 50, type: "armor" },
+            { name: "Breastplate of Greed", emoji: "🛡️", description: "Decorated with golden coins.", effect: "+1 gold for every bid made", cursed: false, value: 45, type: "armor" },
+            { name: "Gauntlets of Power", emoji: "🧤", description: "Make your hands tingle with energy.", effect: "Bids 20% stronger", cursed: false, value: 60, type: "armor" },
+            { name: "Boots of Speed", emoji: "👢", description: "Leather boots that shimmer when moved.", effect: "Go first in next auction", cursed: false, value: 30, type: "armor", usable: true },
+            { name: "Cursed Armor", emoji: "🛡️", description: "Whispers dark secrets to its wearer.", effect: "Randomly pass on bids", cursed: true, value: 35, type: "armor" },
+            
+            // Artifacts (25)
+            { name: "Golden Idol", emoji: "🏆", description: "A heavy idol that radiates wealth.", effect: "Double your gold next turn", cursed: false, value: 70, type: "artifact" },
+            { name: "Philosopher's Stone", emoji: "💎", description: "A red stone said to turn lead to gold.", effect: "Gain 25 gold immediately", cursed: false, value: 80, type: "artifact" },
+            { name: "Jar of Souls", emoji: "🏺", description: "You can hear faint screaming from within.", effect: "Lose a random item (souls demand payment)", cursed: true, value: 55, type: "artifact" },
+            { name: "Cloak of Invisibility", emoji: "🧥", description: "A silvery cloak that shimmers in the light.", effect: "Automatically win next bid under 30 gold", cursed: false, value: 65, type: "artifact", usable: true },
+            { name: "Crystal Ball", emoji: "🔮", description: "The mists inside show glimpses of the future.", effect: "See next item before bidding", cursed: false, value: 50, type: "artifact", usable: true },
+            
+            // Potions (25)
+            { name: "Potion of Luck", emoji: "🧪", description: "Bubbles with golden liquid.", effect: "Next bid has 50% chance to cost nothing", cursed: false, value: 40, type: "potion", usable: true },
+            { name: "Potion of Greed", emoji: "🧪", description: "Thick and syrupy.", effect: "Next bid is doubled in power", cursed: false, value: 45, type: "potion", usable: true },
+            { name: "Cursed Potion", emoji: "🧪", description: "Smells like rotten eggs.", effect: "Random effect - may be good or bad", cursed: true, value: 30, type: "potion", usable: true },
+            { name: "Potion of Goblin Friendship", emoji: "🧪", description: "Green and frothy.", effect: "Goblins less aggressive for 3 turns", cursed: false, value: 35, type: "potion", usable: true },
+            { name: "Potion of Gold Detection", emoji: "🧪", description: "Glows when near valuable items.", effect: "See exact item values", cursed: false, value: 50, type: "potion", usable: true },
+            
+            // Books (25)
+            { name: "Book of Bidding", emoji: "📖", description: "Contains ancient auction strategies.", effect: "See approximate item values", cursed: false, value: 30, type: "book" },
+            { name: "Tome of Goblin Tongue", emoji: "📖", description: "Teaches the guttural goblin language.", effect: "Understand goblin taunts", cursed: false, value: 25, type: "book" },
+            { name: "Cursed Grimoire", emoji: "📖", description: "Pages turn on their own.", effect: "Random effects during bidding", cursed: true, value: 45, type: "book" },
+            { name: "Ledger of Accounts", emoji: "📖", description: "Tracks all bazaar transactions.", effect: "See goblin gold amounts", cursed: false, value: 40, type: "book" },
+            { name: "Manual of Mercantile", emoji: "📖", description: "Teaches advanced bargaining.", effect: "10% discount on all bids", cursed: false, value: 35, type: "book" },
+            
+            // Misc (25)
+            { name: "Bag of Holding", emoji: "👜", description: "A small bag that seems much larger inside.", effect: "Gain 10 gold per turn (from found coins)", cursed: false, value: 50, type: "misc", passiveIncome: 10, incomeInterval: 10 },
+            { name: "Cursed Coin", emoji: "🪙", description: "Always returns to your pocket.", effect: "Lose 1 gold every 10 seconds", cursed: true, value: 20, type: "misc", passiveLoss: 1, lossInterval: 10 },
+            { name: "Lucky Dice", emoji: "🎲", description: "Always roll high... usually.", effect: "Random bid discounts", cursed: false, value: 30, type: "misc" },
+            { name: "Goblin Tooth", emoji: "🦷", description: "A trophy from a defeated foe.", effect: "Intimidate one goblin per game", cursed: false, value: 25, type: "misc", usable: true },
+            { name: "Bazaar Map", emoji: "🗺️", description: "Shows secret shortcuts.", effect: "Sometimes find extra gold", cursed: false, value: 35, type: "misc" }
+        ];
+
+        // Generate more items by combining properties
+        const itemTypes = ["ring", "amulet", "weapon", "armor", "artifact", "potion", "book", "misc"];
+        const materials = ["Gold", "Silver", "Bronze", "Iron", "Steel", "Crystal", "Obsidian", "Bone", "Wooden", "Jade"];
+        const powers = ["Power", "Might", "Wisdom", "Cunning", "Speed", "Luck", "Fortune", "Greed", "Shadows", "Light"];
+        const origins = ["of the Goblin King", "of the Forgotten Tomb", "of the Dark Bazaar", "of the Ancient Ones", "of Lost Cities", "of the Deep Mines", "of the Accursed", "of the Merchant Prince", "of the Hoarder", "of the Bargainer"];
+
+        for (let i = 0; i < 75; i++) {
+            const type = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+            let emoji, description, effect, cursed, value, passiveIncome, incomeInterval, passiveLoss, lossInterval, usable;
+            
+            // Set emoji based on type
+            switch(type) {
+                case "ring": emoji = "💍"; break;
+                case "amulet": emoji = "🔮"; break;
+                case "weapon": 
+                    emoji = ["🗡️", "⚔️", "🏹", "🪓"][Math.floor(Math.random() * 4)]; 
+                    break;
+                case "armor": 
+                    emoji = ["⛑️", "🛡️", "🧤", "👢"][Math.floor(Math.random() * 4)]; 
+                    break;
+                case "artifact": emoji = ["🏆", "💎", "🏺", "🧥", "🔮"][Math.floor(Math.random() * 5)]; break;
+                case "potion": emoji = "🧪"; break;
+                case "book": emoji = "📖"; break;
+                case "misc": emoji = ["👜", "🪙", "🎲", "🦷", "🗺️"][Math.floor(Math.random() * 5)]; break;
+            }
+            
+            // Generate random properties
+            cursed = Math.random() < 0.3;
+            value = 20 + Math.floor(Math.random() * 60);
+            usable = Math.random() < 0.3; // 30% chance item is usable
+            
+            // 20% chance for passive income
+            if (Math.random() < 0.2) {
+                passiveIncome = 1 + Math.floor(Math.random() * 10);
+                incomeInterval = 5 + Math.floor(Math.random() * 25);
+            }
+            
+            // If cursed, 50% chance for passive loss
+            if (cursed && Math.random() < 0.5) {
+                passiveLoss = 1 + Math.floor(Math.random() * 3);
+                lossInterval = 5 + Math.floor(Math.random() * 15);
+            }
+            
+            // Generate random effects
+            const effects = [
+                `+${Math.floor(Math.random() * 10) + 1} gold every ${Math.floor(Math.random() * 30) + 10} seconds`,
+                `${Math.floor(Math.random() * 30) + 10}% chance to bluff for free`,
+                `See ${["item values", "goblin gold", "next item", "bluff chances"][Math.floor(Math.random() * 4)]}`,
+                `${Math.floor(Math.random() * 30) + 10}% discount on bids`,
+                `Goblins ${Math.floor(Math.random() * 30) + 10}% less aggressive`,
+                `Steal ${Math.floor(Math.random() * 10) + 5} gold on win`,
+                `Skip ${Math.floor(Math.random() * 2) + 1} turns`,
+                `Double next ${Math.floor(Math.random() * 2) + 1} bids`,
+                `Auto-win bids under ${Math.floor(Math.random() * 20) + 10} gold`,
+                `Lose ${Math.floor(Math.random() * 10) + 1} gold every ${Math.floor(Math.random() * 20) + 5} seconds`
+            ];
+            
+            effect = effects[Math.floor(Math.random() * effects.length)];
+            
+            // Create the item
+            const material = materials[Math.floor(Math.random() * materials.length)];
+            const power = powers[Math.floor(Math.random() * powers.length)];
+            const origin = origins[Math.floor(Math.random() * origins.length)];
+            
+            items.push({
+                name: `${material} ${power} ${type.charAt(0).toUpperCase() + type.slice(1)} ${origin}`,
+                emoji,
+                description: `A ${material.toLowerCase()} ${type} that radiates ${power.toLowerCase()}.`,
+                effect,
+                cursed,
+                value,
+                type,
+                passiveIncome,
+                incomeInterval,
+                passiveLoss,
+                lossInterval,
+                usable
+            });
+        }
+        
+        // DOM elements
+        const elements = {
+            itemName: document.getElementById('item-name'),
+            itemDescription: document.getElementById('item-description'),
+            itemEffect: document.getElementById('item-effect'),
+            itemImage: document.getElementById('item-image'),
+            itemValue: document.getElementById('item-value'),
+            itemDisplay: document.getElementById('item-display'),
+            playerGold: document.getElementById('player-gold-amount'),
+            passiveIncome: document.getElementById('passive-income-amount'),
+            goblinGold: [
+                document.getElementById('goblin1-gold'),
+                document.getElementById('goblin2-gold')
+            ],
+            goblinBids: [
+                document.getElementById('goblin1-bid'),
+                document.getElementById('goblin2-bid')
+            ],
+            messageLog: document.getElementById('message-log'),
+            bidInput: document.getElementById('bid-input'),
+            bidButton: document.getElementById('bid-button'),
+            bluffButton: document.getElementById('bluff-button'),
+            passButton: document.getElementById('pass-button'),
+            gameOverScreen: document.getElementById('game-over'),
+            finalScore: document.getElementById('final-score'),
+            restartButton: document.getElementById('restart-button'),
+            goblinElements: [
+                document.getElementById('goblin1'),
+                document.getElementById('goblin2')
+            ],
+            inventoryScreen: document.getElementById('inventory-screen'),
+            inventoryItems: document.getElementById('inventory-items'),
+            closeInventory: document.getElementById('close-inventory'),
+            viewInventory: document.getElementById('view-inventory'),
+            inventoryCount: document.getElementById('inventory-count'),
+            nextBidAmount: document.getElementById('next-bid-amount'),
+            bluffAmount: document.getElementById('bluff-amount'),
+            goblinPupils: {
+                left: [
+                    document.getElementById('goblin1-pupil-left'),
+                    document.getElementById('goblin2-pupil-left')
+                ],
+                right: [
+                    document.getElementById('goblin1-pupil-right'),
+                    document.getElementById('goblin2-pupil-right')
+                ]
+            },
+            resetButton: document.getElementById('reset-button'),
+            countdownDisplay: document.getElementById('countdown-display')
+        };
+        
+        // Initialize game
+        function initGame() {
+            // Try to load saved game
+            const savedGame = localStorage.getItem('goblinAuctionWarsSave');
+            if (savedGame) {
+                try {
+                    const parsed = JSON.parse(savedGame);
+                    gameState.playerGold = parsed.playerGold || 100;
+                    gameState.passiveIncome = parsed.passiveIncome || 0;
+                    gameState.itemsWon = parsed.itemsWon || [];
+                    
+                    // Initialize goblins
+                    gameState.goblins = [
+                        { 
+                            name: "Grubnash the Greedy", 
+                            gold: parsed.goblins?.[0]?.gold || 100, 
+                            aggression: 0.7, 
+                            bluffChance: 0.3,
+                            personality: "aggressive"
+                        },
+                        { 
+                            name: "Snizzle the Sneaky", 
+                            gold: parsed.goblins?.[1]?.gold || 100, 
+                            aggression: 0.5, 
+                            bluffChance: 0.6,
+                            personality: "sneaky"
+                        }
+                    ];
+                    
+                    addMessage("Game loaded from your previous session!", "auction-message");
+                } catch (e) {
+                    console.error("Failed to load saved game:", e);
+                    resetGameState();
+                }
+            } else {
+                resetGameState();
+            }
+            
+            gameState.currentItem = null;
+            gameState.currentBid = 0;
+            gameState.currentBidder = null;
+            gameState.gameOver = false;
+            gameState.bluffActive = false;
+            gameState.specialEvents = {
+                doubleNextBid: false,
+                autoWinUnder: null,
+                seeNextItem: false,
+                skipNextTurn: false,
+                goFirstNext: false
+            };
+            gameState.lastItemIndex = -1;
+            gameState.bidTimer = null;
+            gameState.lastBidTime = 0;
+            gameState.countdownActive = false;
+            
+            // Clear any existing interval
+            if (gameState.incomeInterval) {
+                clearInterval(gameState.incomeInterval);
+                gameState.incomeInterval = null;
+            }
+            
+            updateUI();
+            addMessage("Welcome to Goblin Auction Wars! The cursed bazaar awaits your bids...", "auction-message");
+            startNewAuction();
+            
+            // Set up goblin eye tracking
+            setupGoblinEyes();
+            
+            // Start passive income interval
+            startIncomeInterval();
+        }
+        
+        function resetGameState() {
+            gameState.playerGold = 100;
+            gameState.passiveIncome = 0;
+            gameState.itemsWon = [];
+            gameState.goblins = [
+                { 
+                    name: "Grubnash the Greedy", 
+                    gold: 100, 
+                    aggression: 0.7, 
+                    bluffChance: 0.3,
+                    personality: "aggressive"
+                },
+                { 
+                    name: "Snizzle the Sneaky", 
+                    gold: 100, 
+                    aggression: 0.5, 
+                    bluffChance: 0.6,
+                    personality: "sneaky"
+                }
+            ];
+        }
+        
+        // Save game state to local storage
+        function saveGame() {
+            const saveData = {
+                playerGold: gameState.playerGold,
+                passiveIncome: gameState.passiveIncome,
+                itemsWon: gameState.itemsWon,
+                goblins: gameState.goblins.map(goblin => ({ gold: goblin.gold }))
+            };
+            localStorage.setItem('goblinAuctionWarsSave', JSON.stringify(saveData));
+        }
+        
+        // Set up goblin eye tracking
+        function setupGoblinEyes() {
+            document.addEventListener('mousemove', (e) => {
+                gameState.goblins.forEach((goblin, index) => {
+                    const goblinElement = elements.goblinElements[index];
+                    const rect = goblinElement.getBoundingClientRect();
+                    const goblinCenterX = rect.left + rect.width / 2;
+                    const goblinCenterY = rect.top + rect.height / 2;
+                    
+                    // Calculate angle to mouse
+                    const angle = Math.atan2(e.clientY - goblinCenterY, e.clientX - goblinCenterX);
+                    
+                    // Move pupils
+                    const pupilDistance = 3;
+                    const leftPupilX = Math.cos(angle) * pupilDistance;
+                    const leftPupilY = Math.sin(angle) * pupilDistance;
+                    const rightPupilX = Math.cos(angle) * pupilDistance;
+                    const rightPupilY = Math.sin(angle) * pupilDistance;
+                    
+                    elements.goblinPupils.left[index].style.transform = `translate(${leftPupilX}px, ${leftPupilY}px)`;
+                    elements.goblinPupils.right[index].style.transform = `translate(${rightPupilX}px, ${rightPupilY}px)`;
+                });
+            });
+        }
+        
+        // Start passive income interval
+        function startIncomeInterval() {
+            gameState.incomeInterval = setInterval(() => {
+                if (gameState.passiveIncome > 0) {
+                    gameState.playerGold += gameState.passiveIncome;
+                    createCoinAnimation();
+                    addMessage(`You earned ${gameState.passiveIncome} gold from your items!`, "income-message");
+                    updateUI();
+                    saveGame();
+                }
+            }, 10000); // Every 10 seconds
+        }
+        
+        // Create coin animation
+        function createCoinAnimation() {
+            const coin = document.createElement('div');
+            coin.className = 'coin-fall';
+            coin.textContent = '🪙';
+            coin.style.left = `${Math.random() * 100}%`;
+            document.body.appendChild(coin);
+            
+            setTimeout(() => {
+                coin.remove();
+            }, 1500);
+        }
+        
+        // Start a new auction with a random item
+        function startNewAuction() {
+            // Check if game should end
+            if (gameState.playerGold <= 0) {
+                endGame(false);
+                return;
+            }
+            
+            if (gameState.goblins.every(goblin => goblin.gold <= 0)) {
+                endGame(true);
+                return;
+            }
+            
+            // Handle skip turn
+            if (gameState.specialEvents.skipNextTurn) {
+                gameState.specialEvents.skipNextTurn = false;
+                addMessage("You were teleported away and miss this turn!", "auction-message");
+                setTimeout(() => {
+                    resolveAuction();
+                }, 2000);
+                return;
+            }
+            
+            // Reset bidding state
+            gameState.currentBid = 0;
+            gameState.currentBidder = null;
+            gameState.bluffActive = false;
+            clearTimeout(gameState.bidTimer);
+            gameState.lastBidTime = 0;
+            gameState.countdownActive = false;
+            elements.countdownDisplay.style.display = 'none';
+            
+            // Select random item (different from last time)
+            let itemIndex;
+            do {
+                itemIndex = Math.floor(Math.random() * items.length);
+            } while (itemIndex === gameState.lastItemIndex && items.length > 1);
+            
+            gameState.lastItemIndex = itemIndex;
+            gameState.currentItem = items[itemIndex];
+            
+            // Update UI
+            if (gameState.specialEvents.seeNextItem) {
+                revealItem();
+                gameState.specialEvents.seeNextItem = false;
+            } else {
+                elements.itemName.textContent = "???";
+                elements.itemDescription.textContent = "A mysterious item is up for auction!";
+                elements.itemEffect.textContent = "";
+                elements.itemValue.textContent = "";
+                elements.itemImage.textContent = "❓";
+                elements.itemDisplay.className = "";
+                elements.itemDisplay.classList.add("gold-shine");
+            }
+            
+            // Reset goblin bids display
+            elements.goblinBids.forEach(bidElement => {
+                bidElement.textContent = "-";
+                bidElement.classList.remove("pulse");
+            });
+            
+            // Enable bidding buttons
+            elements.bidButton.disabled = false;
+            elements.bluffButton.disabled = false;
+            elements.passButton.disabled = false;
+            
+            addMessage(`A new item has been revealed for auction!`, "auction-message");
+            
+            // Goblins may place initial bids
+            setTimeout(() => {
+                if (!gameState.specialEvents.goFirstNext) {
+                    goblinBidding();
+                } else {
+                    gameState.specialEvents.goFirstNext = false;
+                    addMessage("You get to bid first this turn!", "auction-message");
+                }
+            }, 1500);
+        }
+        
+        // Reveal the current item
+        function revealItem() {
+            elements.itemName.textContent = gameState.currentItem.name;
+            elements.itemDescription.textContent = gameState.currentItem.description;
+            elements.itemEffect.textContent = gameState.currentItem.effect;
+            elements.itemValue.textContent = `Estimated Value: ${gameState.currentItem.value} gold`;
+            elements.itemImage.textContent = gameState.currentItem.emoji;
+            
+            // Reset classes
+            elements.itemDisplay.className = "";
+            elements.itemImage.classList.add("item-pop");
+            
+            if (gameState.currentItem.cursed) {
+                elements.itemDisplay.classList.add("cursed-item");
+                addMessage(`The ${gameState.currentItem.name} is cursed!`, "cursed-message");
+            } else if (gameState.currentItem.passiveIncome) {
+                elements.itemDisplay.classList.add("income-item");
+            } else {
+                elements.itemDisplay.classList.add("gold-item");
+            }
+            
+            elements.itemDisplay.classList.add("shake");
+            setTimeout(() => {
+                elements.itemDisplay.classList.remove("shake");
+                elements.itemImage.classList.remove("item-pop");
+            }, 500);
+        }
+        
+        // Handle goblin bidding
+        function goblinBidding() {
+            // Clear any existing bid timer
+            clearTimeout(gameState.bidTimer);
+            
+            // Reset countdown if it was active
+            if (gameState.countdownActive) {
+                gameState.countdownActive = false;
+                elements.countdownDisplay.style.display = 'none';
+            }
+            
+            let anyGoblinBid = false;
+            
+            gameState.goblins.forEach((goblin, index) => {
+                if (goblin.gold <= 0) return;
+                
+                // Decide if this goblin will bid (based on aggression)
+                const willBid = Math.random() < goblin.aggression;
+                
+                if (willBid) {
+                    anyGoblinBid = true;
+                    
+                    // Decide if this is a bluff (based on bluffChance)
+                    const isBluff = Math.random() < goblin.bluffChance;
+                    
+                    // Calculate bid amount (base + random)
+                    let bidAmount;
+                    if (isBluff) {
+                        // Bluff adds 5-10 to current bid without actually having the gold
+                        bidAmount = gameState.currentBid + Math.floor(Math.random() * 6) + 5;
+                        addMessage(`${goblin.name} bluffs with a bid of ${bidAmount}!`, "goblin-message");
+                    } else {
+                        // Real bid is based on item value and goblin's gold
+                        const maxBid = Math.min(
+                            Math.floor(gameState.currentItem.value * (0.7 + Math.random() * 0.6)),
+                            goblin.gold
+                        );
+                        bidAmount = gameState.currentBid + Math.floor(Math.random() * (maxBid - gameState.currentBid) / 2) + 1;
+                        addMessage(`${goblin.name} bids ${bidAmount}!`, "goblin-message");
+                    }
+                    
+                    // Update bid display
+                    elements.goblinBids[index].textContent = bidAmount;
+                    elements.goblinBids[index].classList.add("pulse");
+                    elements.goblinElements[index].classList.add("talking");
+                    
+                    setTimeout(() => {
+                        elements.goblinBids[index].classList.remove("pulse");
+                        elements.goblinElements[index].classList.remove("talking");
+                    }, 1000);
+                    
+                    // Update game state if it's a real bid
+                    if (!isBluff) {
+                        gameState.currentBid = bidAmount;
+                        gameState.currentBidder = index;
+                        gameState.lastBidTime = Date.now();
+                    }
+                }
+            });
+            
+            updateUI();
+            
+            // Start countdown if no one bids
+            if (!anyGoblinBid && gameState.currentBid > 0) {
+                startCountdown();
+            } else {
+                // Set timer for next bid check
+                gameState.bidTimer = setTimeout(() => {
+                    goblinBidding();
+                }, gameState.bidTimeout);
+            }
+        }
+        
+        // Start the dramatic countdown
+        function startCountdown() {
+            gameState.countdownActive = true;
+            let count = 3;
+            
+            elements.countdownDisplay.style.display = 'block';
+            elements.countdownDisplay.textContent = count;
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                elements.countdownDisplay.textContent = count;
+                
+                if (count <= 0) {
+                    clearInterval(countdownInterval);
+                    elements.countdownDisplay.textContent = "SOLD!";
+                    
+                    setTimeout(() => {
+                        elements.countdownDisplay.style.display = 'none';
+                        gameState.countdownActive = false;
+                        resolveAuction();
+                    }, 1000);
+                }
+            }, 1000);
+        }
+        
+        // Player places a bid
+        function placeBid() {
+            let bidAmount = parseInt(elements.nextBidAmount.textContent);
+            
+            if (isNaN(bidAmount)) {
+                addMessage("Invalid bid amount!", "auction-message");
+                return;
+            }
+            
+            if (bidAmount <= gameState.currentBid) {
+                elements.bidButton.classList.add("bid-rejected");
+                setTimeout(() => {
+                    elements.bidButton.classList.remove("bid-rejected");
+                }, 500);
+                addMessage(`Your bid must be higher than ${gameState.currentBid}!`, "auction-message");
+                return;
+            }
+            
+            if (bidAmount > gameState.playerGold) {
+                elements.bidButton.classList.add("bid-rejected");
+                setTimeout(() => {
+                    elements.bidButton.classList.remove("bid-rejected");
+                }, 500);
+                addMessage("You don't have enough gold for that bid!", "auction-message");
+                elements.bidButton.classList.add("disabled-button");
+                return;
+            }
+            
+            // Handle auto-win under certain amount
+            if (gameState.specialEvents.autoWinUnder && bidAmount <= gameState.specialEvents.autoWinUnder) {
+                addMessage(`Your cloak lets you win bids under ${gameState.specialEvents.autoWinUnder} gold automatically!`, "auction-message");
+                gameState.specialEvents.autoWinUnder = null;
+                gameState.currentBid = bidAmount;
+                gameState.currentBidder = -1;
+                setTimeout(() => {
+                    resolveAuction();
+                }, 1500);
+                return;
+            }
+            
+            // Handle double bid power
+            if (gameState.specialEvents.doubleNextBid) {
+                const effectiveBid = bidAmount * 2;
+                addMessage(`Your item doubles your bid to ${effectiveBid}!`, "auction-message");
+                bidAmount = effectiveBid;
+                gameState.specialEvents.doubleNextBid = false;
+            }
+            
+            elements.bidButton.classList.add("bid-accepted");
+            setTimeout(() => {
+                elements.bidButton.classList.remove("bid-accepted");
+            }, 500);
+            
+            gameState.currentBid = bidAmount;
+            gameState.currentBidder = -1; // -1 means player is highest bidder
+            gameState.lastBidTime = Date.now();
+            
+            addMessage(`You bid ${bidAmount}!`, "auction-message");
+            
+            // Clear any existing countdown
+            if (gameState.countdownActive) {
+                gameState.countdownActive = false;
+                elements.countdownDisplay.style.display = 'none';
+            }
+            
+            // Goblins may counter-bid
+            setTimeout(() => {
+                goblinBidding();
+            }, 1500);
+            
+            updateUI();
+            saveGame();
+        }
+        
+        // Player attempts to bluff
+        function bluff() {
+            if (gameState.bluffActive) {
+                elements.bluffButton.classList.add("bid-rejected");
+                setTimeout(() => {
+                    elements.bluffButton.classList.remove("bid-rejected");
+                }, 500);
+                addMessage("You're already bluffing!", "auction-message");
+                return;
+            }
+            
+            // 25% chance for free bluff if you have the Ring of Blinking
+            const hasBlinkingRing = gameState.itemsWon.some(item => item.name === "Ring of Blinking");
+            const freeBluff = hasBlinkingRing && Math.random() < 0.25;
+            
+            if (freeBluff) {
+                addMessage("Your Ring of Blinking lets you bluff for free!", "auction-message");
+            }
+            
+            elements.bluffButton.classList.add("bid-accepted");
+            setTimeout(() => {
+                elements.bluffButton.classList.remove("bid-accepted");
+            }, 500);
+            
+            gameState.bluffActive = true;
+            const bluffAmount = gameState.currentBid + Math.floor(Math.random() * 6) + 5;
+            elements.bluffAmount.textContent = `${bluffAmount - gameState.currentBid}`;
+            
+            addMessage(`You bluff and pretend to bid ${bluffAmount}!`, "auction-message");
+            
+            // Goblins may react to the bluff
+            setTimeout(() => {
+                goblinBidding();
+            }, 1500);
+            
+            updateUI();
+            saveGame();
+        }
+        
+        // Player passes on this item
+        function pass() {
+            elements.passButton.classList.add("pass-animation");
+            setTimeout(() => {
+                elements.passButton.classList.remove("pass-animation");
+            }, 1000);
+            
+            addMessage("You pass on this item.", "auction-message");
+            
+            // If no one has bid, start new auction
+            if (gameState.currentBid === 0) {
+                setTimeout(() => {
+                    startNewAuction();
+                }, 1500);
+                return;
+            }
+            
+            // Otherwise, resolve auction
+            setTimeout(() => {
+                resolveAuction();
+            }, 1500);
+            
+            saveGame();
+        }
+        
+        // Resolve the auction and apply item effects
+        function resolveAuction() {
+            // If no one bid, just start new auction
+            if (gameState.currentBid === 0) {
+                startNewAuction();
+                return;
+            }
+            
+            // Determine winner
+            let winner;
+            if (gameState.currentBidder === -1) {
+                // Player won
+                winner = { type: "player", gold: gameState.playerGold };
+                gameState.playerGold -= gameState.currentBid;
+                gameState.itemsWon.push(gameState.currentItem);
+                
+                // Check for passive income
+                if (gameState.currentItem.passiveIncome) {
+                    gameState.passiveIncome += gameState.currentItem.passiveIncome;
+                    addMessage(`You gained ${gameState.currentItem.passiveIncome} gold every ${gameState.currentItem.incomeInterval} seconds!`, "income-message");
+                }
+                
+                // Check for passive loss
+                if (gameState.currentItem.passiveLoss) {
+                    const lossInterval = setInterval(() => {
+                        gameState.playerGold = Math.max(0, gameState.playerGold - gameState.currentItem.passiveLoss);
+                        addMessage(`You lost ${gameState.currentItem.passiveLoss} gold from ${gameState.currentItem.name}!`, "cursed-message");
+                        updateUI();
+                        saveGame();
+                        
+                        if (gameState.playerGold <= 0) {
+                            clearInterval(lossInterval);
+                            endGame(false);
+                        }
+                    }, gameState.currentItem.lossInterval * 1000);
+                }
+                
+                addMessage(`You won the ${gameState.currentItem.name} for ${gameState.currentBid} gold!`, "auction-message");
+            } else {
+                // Goblin won
+                winner = { 
+                    type: "goblin", 
+                    index: gameState.currentBidder,
+                    gold: gameState.goblins[gameState.currentBidder].gold,
+                    name: gameState.goblins[gameState.currentBidder].name
+                };
+                gameState.goblins[gameState.currentBidder].gold -= gameState.currentBid;
+                addMessage(`${winner.name} won the ${gameState.currentItem.name} for ${gameState.currentBid} gold!`, "goblin-message");
+            }
+            
+            // Apply item effect
+            applyItemEffect(winner);
+            
+            updateUI();
+            saveGame();
+            
+            // Start new auction after delay
+            setTimeout(() => {
+                startNewAuction();
+            }, 3000);
+        }
+        
+        // Apply the effects of the won item
+        function applyItemEffect(winner) {
+            const item = gameState.currentItem;
+            
+            // Handle general effects first
+            if (item.passiveIncome && winner.type === "player") {
+                gameState.passiveIncome += item.passiveIncome;
+            }
+            
+            // Handle specific item effects
+            if (item.name.includes("Ring of Teleportation")) {
+                if (winner.type === "player") {
+                    gameState.specialEvents.skipNextTurn = true;
+                }
+                addMessage(`${winner.type === "player" ? "You" : winner.name} ${winner.type === "player" ? "are" : "is"} teleported away!`, "auction-message");
+            } 
+            else if (item.name.includes("Cursed Amulet") || item.name.includes("Cursed")) {
+                const lossAmount = item.name.includes("Amulet") ? 20 : Math.floor(Math.random() * 15) + 5;
+                if (winner.type === "player") {
+                    gameState.playerGold = Math.max(0, gameState.playerGold - lossAmount);
+                    addMessage(`The ${item.name}'s curse makes you lose ${lossAmount} gold!`, "cursed-message");
+                } else {
+                    gameState.goblins[winner.index].gold = Math.max(0, gameState.goblins[winner.index].gold - lossAmount);
+                    addMessage(`The ${item.name}'s curse makes ${winner.name} lose ${lossAmount} gold!`, "cursed-message");
+                }
+            }
+            else if (item.name.includes("Boots of Speed")) {
+                if (winner.type === "player") {
+                    gameState.specialEvents.goFirstNext = true;
+                }
+                addMessage(`${winner.type === "player" ? "You" : winner.name} will go first next auction!`, "auction-message");
+            }
+            else if (item.name.includes("Dagger of Betrayal")) {
+                const targetIndex = Math.floor(Math.random() * gameState.goblins.length);
+                const stolenAmount = Math.min(15, gameState.goblins[targetIndex].gold);
+                
+                if (winner.type === "player") {
+                    gameState.playerGold += stolenAmount;
+                    gameState.goblins[targetIndex].gold -= stolenAmount;
+                    addMessage(`You steal ${stolenAmount} gold from ${gameState.goblins[targetIndex].name} with the dagger!`, "auction-message");
+                } else {
+                    gameState.goblins[winner.index].gold += stolenAmount;
+                    gameState.goblins[targetIndex].gold -= stolenAmount;
+                    addMessage(`${winner.name} steals ${stolenAmount} gold from ${gameState.goblins[targetIndex].name} with the dagger!`, "goblin-message");
+                }
+            }
+            else if (item.name.includes("Golden Idol")) {
+                if (winner.type === "player") {
+                    gameState.playerGold *= 2;
+                    addMessage("The idol doubles your gold!", "auction-message");
+                } else {
+                    gameState.goblins[winner.index].gold *= 2;
+                    addMessage(`The idol doubles ${winner.name}'s gold!`, "goblin-message");
+                }
+            }
+            else if (item.name.includes("Philosopher's Stone")) {
+                const gainAmount = item.name.includes("Philosopher") ? 25 : Math.floor(Math.random() * 20) + 10;
+                if (winner.type === "player") {
+                    gameState.playerGold += gainAmount;
+                    addMessage(`The ${item.name} grants you ${gainAmount} gold!`, "auction-message");
+                } else {
+                    gameState.goblins[winner.index].gold += gainAmount;
+                    addMessage(`The ${item.name} grants ${winner.name} ${gainAmount} gold!`, "goblin-message");
+                }
+            }
+            else if (item.name.includes("Jar of Souls")) {
+                if (winner.type === "player" && gameState.itemsWon.length > 0) {
+                    const lostItemIndex = Math.floor(Math.random() * gameState.itemsWon.length);
+                    const lostItem = gameState.itemsWon.splice(lostItemIndex, 1)[0];
+                    
+                    // Remove any passive income from lost item
+                    if (lostItem.passiveIncome) {
+                        gameState.passiveIncome -= lostItem.passiveIncome;
+                    }
+                    
+                    addMessage(`The souls take your ${lostItem.name} as payment!`, "cursed-message");
+                } else if (winner.type === "goblin") {
+                    addMessage(`The souls scream at ${winner.name} but find nothing to take!`, "goblin-message");
+                } else {
+                    addMessage("The souls scream but find nothing to take from you!", "auction-message");
+                }
+            }
+            else if (item.name.includes("Cloak of Invisibility")) {
+                if (winner.type === "player") {
+                    gameState.specialEvents.autoWinUnder = 30;
+                }
+                addMessage(`${winner.type === "player" ? "You" : winner.name} will automatically win the next bid under 30 gold!`, "auction-message");
+            }
+            else if (item.name.includes("Crystal Ball")) {
+                if (winner.type === "player") {
+                    gameState.specialEvents.seeNextItem = true;
+                }
+                addMessage(`${winner.type === "player" ? "You" : winner.name} can see the next item in advance!`, "auction-message");
+            }
+            else if (item.name.includes("Potion of Luck")) {
+                if (winner.type === "player") {
+                    gameState.specialEvents.doubleNextBid = true;
+                }
+                addMessage(`${winner.type === "player" ? "Your" : winner.name + "'s"} next bid will be doubled!`, "auction-message");
+            }
+            
+            updateUI();
+            saveGame();
+        }
+        
+        // Use an item from inventory
+        function useItem(item) {
+            if (!item.usable) return;
+            
+            if (item.name.includes("Ring of Teleportation")) {
+                gameState.specialEvents.skipNextTurn = true;
+                addMessage("You activate the Ring of Teleportation to skip the next auction!", "auction-message");
+            }
+            else if (item.name.includes("Boots of Speed")) {
+                gameState.specialEvents.goFirstNext = true;
+                addMessage("You activate the Boots of Speed to go first next auction!", "auction-message");
+            }
+            else if (item.name.includes("Cloak of Invisibility")) {
+                gameState.specialEvents.autoWinUnder = 30;
+                addMessage("You activate the Cloak of Invisibility to auto-win bids under 30 gold!", "auction-message");
+            }
+            else if (item.name.includes("Crystal Ball")) {
+                gameState.specialEvents.seeNextItem = true;
+                addMessage("You activate the Crystal Ball to see the next item!", "auction-message");
+            }
+            else if (item.name.includes("Potion of Luck")) {
+                gameState.specialEvents.doubleNextBid = true;
+                addMessage("You drink the Potion of Luck to double your next bid!", "auction-message");
+            }
+            else if (item.name.includes("Potion of Greed")) {
+                gameState.specialEvents.doubleNextBid = true;
+                addMessage("You drink the Potion of Greed to double your next bid!", "auction-message");
+            }
+            else if (item.name.includes("Goblin Tooth")) {
+                const targetIndex = Math.floor(Math.random() * gameState.goblins.length);
+                gameState.goblins[targetIndex].aggression = Math.max(0.1, gameState.goblins[targetIndex].aggression - 0.2);
+                addMessage(`You intimidate ${gameState.goblins[targetIndex].name} with the Goblin Tooth!`, "auction-message");
+            }
+            
+            // Remove the item if it's single-use
+            if (item.name.includes("Potion") || item.name.includes("Goblin Tooth")) {
+                const index = gameState.itemsWon.findIndex(i => i === item);
+                if (index !== -1) {
+                    gameState.itemsWon.splice(index, 1);
+                }
+            }
+            
+            updateUI();
+            saveGame();
+            showInventory(); // Refresh inventory display
+        }
+        
+        // Update the UI
+        function updateUI() {
+            elements.playerGold.textContent = gameState.playerGold;
+            elements.passiveIncome.textContent = gameState.passiveIncome;
+            elements.inventoryCount.textContent = gameState.itemsWon.length;
+            
+            gameState.goblins.forEach((goblin, index) => {
+                elements.goblinGold[index].textContent = goblin.gold;
+            });
+            
+            // Update next bid amount
+            const nextBid = Math.max(gameState.currentBid + 5, 10);
+            elements.nextBidAmount.textContent = nextBid;
+            
+            // Update bluff amount
+            const bluffAmount = gameState.currentBid + Math.floor(Math.random() * 6) + 5;
+            elements.bluffAmount.textContent = `${bluffAmount - gameState.currentBid}`;
+            
+            // Disable buttons if player can't bid
+            if (gameState.playerGold <= 0 || gameState.gameOver) {
+                elements.bidButton.disabled = true;
+                elements.bluffButton.disabled = true;
+                elements.passButton.disabled = true;
+            } else {
+                // Only disable bid button if player can't afford next bid
+                const nextBidAmount = parseInt(elements.nextBidAmount.textContent);
+                elements.bidButton.disabled = nextBidAmount > gameState.playerGold;
+                
+                if (elements.bidButton.disabled) {
+                    elements.bidButton.classList.add("disabled-button");
+                } else {
+                    elements.bidButton.classList.remove("disabled-button");
+                }
+            }
+            
+            // Highlight active bidder
+            elements.goblinBids.forEach((bid, index) => {
+                if (gameState.currentBidder === index) {
+                    bid.classList.add("highlight");
+                } else {
+                    bid.classList.remove("highlight");
+                }
+            });
+        }
+        
+        // Add a message to the log
+        function addMessage(text, className) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', className);
+            messageElement.textContent = text;
+            elements.messageLog.appendChild(messageElement);
+            elements.messageLog.scrollTop = elements.messageLog.scrollHeight;
+        }
+        
+        // Show inventory
+        function showInventory() {
+            elements.inventoryItems.innerHTML = '';
+            
+            if (gameState.itemsWon.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.textContent = "Your inventory is empty! Win some auctions to collect items.";
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.padding = '20px';
+                emptyMsg.style.color = '#888';
+                elements.inventoryItems.appendChild(emptyMsg);
+            } else {
+                gameState.itemsWon.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'inventory-item';
+                    
+                    const emoji = document.createElement('div');
+                    emoji.className = 'item-emoji';
+                    emoji.textContent = item.emoji;
+                    itemElement.appendChild(emoji);
+                    
+                    const name = document.createElement('div');
+                    name.className = 'item-name';
+                    name.textContent = item.name;
+                    itemElement.appendChild(name);
+                    
+                    const desc = document.createElement('div');
+                    desc.className = 'item-description';
+                    desc.textContent = item.description;
+                    itemElement.appendChild(desc);
+                    
+                    const effect = document.createElement('div');
+                    effect.className = 'item-effect';
+                    effect.textContent = item.effect;
+                    itemElement.appendChild(effect);
+                    
+                    if (item.usable) {
+                        const useButton = document.createElement('button');
+                        useButton.className = 'item-use-button';
+                        useButton.textContent = 'Use Item';
+                        useButton.addEventListener('click', () => useItem(item));
+                        itemElement.appendChild(useButton);
+                    }
+                    
+                    if (item.cursed) {
+                        itemElement.style.borderColor = 'var(--cursed-purple)';
+                    } else if (item.passiveIncome) {
+                        itemElement.style.borderColor = '#7CFC00';
+                    }
+                    
+                    elements.inventoryItems.appendChild(itemElement);
+                });
+            }
+            
+            elements.inventoryScreen.style.display = 'flex';
+        }
+        
+        // End the game
+        function endGame(playerWon) {
+            gameState.gameOver = true;
+            
+            elements.gameOverScreen.style.display = "flex";
+            
+            if (playerWon) {
+                elements.finalScore.innerHTML = `You defeated all goblins!<br><br>
+                    Final Gold: ${gameState.playerGold}<br>
+                    Items Collected: ${gameState.itemsWon.length}<br><br>
+                    The goblins bow to your superior bidding skills!`;
+            } else {
+                elements.finalScore.innerHTML = `You ran out of gold!<br><br>
+                    Items Collected: ${gameState.itemsWon.length}<br><br>
+                    The goblins laugh as you're dragged away by bazaar guards...`;
+            }
+            
+            // Clear the saved game
+            localStorage.removeItem('goblinAuctionWarsSave');
+        }
+        
+        // Reset the game completely
+        function resetGame() {
+            // Clear saved game
+            localStorage.removeItem('goblinAuctionWarsSave');
+            
+            // Reset game state
+            resetGameState();
+            
+            // Hide game over screen if shown
+            elements.gameOverScreen.style.display = "none";
+            
+            // Clear message log
+            elements.messageLog.innerHTML = "";
+            
+            // Reinitialize game
+            initGame();
+            
+            addMessage("Game has been reset!", "auction-message");
+        }
+        
+        // Event listeners
+        elements.bidButton.addEventListener('click', placeBid);
+        elements.bluffButton.addEventListener('click', bluff);
+        elements.passButton.addEventListener('click', pass);
+        elements.restartButton.addEventListener('click', () => {
+            elements.gameOverScreen.style.display = "none";
+            elements.messageLog.innerHTML = "";
+            initGame();
+        });
+        elements.viewInventory.addEventListener('click', showInventory);
+        elements.closeInventory.addEventListener('click', () => {
+            elements.inventoryScreen.style.display = 'none';
+        });
+        elements.resetButton.addEventListener('click', resetGame);
+        
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
